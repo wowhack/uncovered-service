@@ -1,10 +1,12 @@
 var audiojumbler = require('./audiojumbler');
+var quantize = require('./quantize');
+var fft = require('./fft');
 var range = require('mout/array/range');
 var domready = require('domready');
 
 domready(function () {
-  var aj = new audiojumbler();
-  aj.start("http://uncovered-proxy.herokuapp.com/mp3-preview/f60c420261754542594ddb4a46ed42972d2b9fd0");
+  // var aj = new audiojumbler();
+  // aj.start("http://uncovered-proxy.herokuapp.com/mp3-preview/f60c420261754542594ddb4a46ed42972d2b9fd0");
 });
 
 window.getAccessToken = require('../auth/client').getAccessToken
@@ -53,3 +55,6 @@ window.shit = function() {
     });
   });
 }
+
+window.quantize = quantize;
+window.fft = fft;

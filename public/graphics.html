@@ -11,25 +11,32 @@
     left: 500px;
     top: 100px;
   }
+  canvas#fftCanvas {
+    position: absolute;
+    left: 900px;
+    top: 100px;
+  }
   </style>
 </head>
 <body>
 
 <canvas id="imageCanvas" width="300" height="300"></canvas>
 <canvas id="coverCanvas" width="300" height="300"></canvas>
+<canvas id="fftCanvas" width="1000" height="300"></canvas>
 
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="client.js"></script>
 
 <script>
 
-var IMAGE_URL = 'http://uncovered-proxy.herokuapp.com/image/8e13218039f81b000553e25522a7f0d7a0600f2e';
+var IMAGE_URL = 'http://uncovered-proxy.herokuapp.com/image/6885bc64100c07ec425b6902eeb88c6c0fde6f89';
 
 var imageCanvas = document.getElementById("imageCanvas");
 var coverCanvas = document.getElementById("coverCanvas");
 
 var imageContext = imageCanvas.getContext('2d');
 var coverContext = coverCanvas.getContext('2d');
+var fftContext = fftCanvas.getContext('2d');
 
 var width = parseInt($(imageCanvas).attr('width'))
 var height = parseInt($(imageCanvas).attr('height'))
@@ -53,6 +60,91 @@ imageObj.onload = function() {
     newImgData.data[i + 3] = 255;
   };
   coverContext.putImageData(newImgData, 0, 0);
+
+  coverContext.fillStyle = "#FF0000";
+  coverContext.fillRect(50,250,8, 8);
+
+  var xblocks = Math.floor(width / 8);
+  var yblocks = Math.floor(height / 8);
+  var numblocks = xblocks * yblocks;
+  var blocks = [
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks),
+    new Float64Array(yblocks * xblocks)
+  ]
+
+  for (var by = 0; by < yblocks; ++by) {
+    for (var bx = 0; bx < xblocks; ++bx) {
+      var re = [];
+      var im = [];
+      for (var y = 0; y < 8; y++) {
+        i = (y + by * 8) * width;
+        outi = y * 8;
+        for (var x = 0; x < 8; x++) {
+          var start = (i << 2) + ((x + bx * 8) << 2);
+          if (start < imgData.data.length) {
+            var R = imgData.data[start];
+            var G = imgData.data[start + 1];
+            var B = imgData.data[start + 2];
+            var luminance = (0.2126*R + 0.7152*G + 0.0722*B);
+            re[outi + x] = luminance
+          } else {
+            re[outi + x] = 0.0;
+          }
+          im[outi + x] = 0.0;
+        }
+      }
+      fft.init(8);
+      fft.fft2d(re, im);
+      var powrad = {}
+      var totpow = 0.0;
+      for (var y = 0; y < 8; y++) {
+        i = y * 8;
+        for (var x = 0; x < 8; x++) {
+          var pow = Math.sqrt(re[i + x] * re[i + x] + im[i + x] * im[i + x]);
+          totpow += pow;
+          var radius = Math.round(Math.sqrt(x*x + y*y));
+          if (radius in powrad) {
+            var val = powrad[radius];
+            powrad[radius] = {pow: val.pow + pow, cnt: val.cnt + 1};
+          } else {
+            powrad[radius] = {pow: pow, cnt: 1};
+          }
+        }
+      }
+      for (k in powrad) {
+        var blk = blocks[k];
+        var val = totpow > 0 ? (powrad[k].pow / powrad[k].cnt) / totpow : 0.0;
+        blk[by * xblocks + bx] = val;
+      }
+    }
+  }
+  for (k in blocks) {
+    var blk = blocks[k];
+    var max = Math.max.apply(null, blk);
+    var img = fftContext.createImageData(xblocks, yblocks);
+    for (var by = 0; by < yblocks; ++by) {
+      for (var bx = 0; bx < xblocks; ++bx) {
+        var ix = by * xblocks + bx;
+        var pxval = Math.floor(255.0 * blk[ix] / max);
+        img.data[ix * 4] = pxval;
+        img.data[ix * 4 + 1] = pxval;
+        img.data[ix * 4 + 2] = pxval;
+        img.data[ix * 4 + 3] = 255;
+      }
+    }
+    fftContext.putImageData(img, k * yblocks, 0);
+  }
+  console.log(blocks);
 };
 imageObj.crossOrigin="Anonymous";
 imageObj.src = IMAGE_URL;
