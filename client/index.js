@@ -8,3 +8,40 @@ domready(function () {
 });
 
 window.getAccessToken = require('../auth/client').getAccessToken
+
+
+function webAPI(path, success) {
+  $.ajax({
+     url: 'https://api.spotify.com/v1' + path,
+     headers: {
+         'Authorization': 'Bearer ' + window.getAccessToken()
+     },
+     success: success,
+     error: function() {
+       console.warn("ERORROROOR", arguments)
+     }
+ });
+}
+
+window.shit = function() {
+  webAPI('/me', function(meResponse) {
+    var username = meResponse.id;
+    webAPI('/users/'+username+'/playlists', function(playlistListResponse) {
+      var designatedPlaylistId = null;
+
+      playlistListResponse.items.forEach(function(item) {
+        if (item.name === 'uncovered') {
+          designatedPlaylistId = item.id
+        }
+      });
+      if (!designatedPlaylistId) {
+        throw new Error('You must have a playlist named "uncovered"!');
+      }
+
+      webAPI('/users/'+username+'/playlists/'+designatedPlaylistId, function(response) {
+          console.log("Found the playlist", response.tracks.items)
+      })
+
+    });
+  });
+}
