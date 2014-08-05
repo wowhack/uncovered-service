@@ -29,7 +29,7 @@ app = connect()
       res.end(fs.readFileSync('./collision-example.html'));
     }
 
-    if (req.url === '/client') {
+    if (req.url === '/client.js') {
       var b = browserify();
       b.add('./client/index.js');
 
