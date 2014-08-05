@@ -1,19 +1,22 @@
-window.onload = init;
-window.requestAnimFrame = (function(){
-                             return window.requestAnimationFrame ||
-                               window.webkitRequestAnimationFrame ||
-                               window.mozRequestAnimationFrame ||
-                               window.oRequestAnimationFrame ||
-                               window.msRequestAnimationFrame ||
-                               function( callback ){
-                                 window.setTimeout(callback, 1000 / 60);
-                               };
-                           })();
+function AudioJumbler() {
+  this.url = null;
+  this.context = new AudioContext();
+  this.lfoGainValues = [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+  this.gainNodes = null;
+}
 
-function init() {
-  var context = new AudioContext();
+AudioJumbler.prototype.setParams = function (lfoValues, fqValues) {
+  this.lfoValues = lfoValues;
+  fqValues.forEach(function (key, value) {
+                     this.gainNodes[key].gain.value = value;
+                   });
+};
 
+AudioJumbler.prototype.stop = function() {
+  this.context.stop();
+};
 
+AudioJumbler.prototype.start = function (url) {
   var current16thNote = 0;     // What note is currently last scheduled?
   var tempo = 120.0;           // tempo (in beats per minute)
   var lookahead = 25.0;        // How frequently to call scheduling function (in milliseconds)
@@ -23,9 +26,9 @@ function init() {
   var nextNoteTime = 0.0;      // when the next note is due.
   var timerID = 0;             // setInterval identifier.
 
-  var lfoGain = context.createGain();
+  var lfoGain = this.context.createGain();
   lfoGain.gain.value = 0.0;
-  lfoGain.connect(context.destination);
+  lfoGain.connect(this.context.destination);
   var lfoGainValues = [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 
   function nextNote() {
@@ -40,13 +43,13 @@ function init() {
   }
 
   function scheduleNote(beatNumber, time) {
-    var lfoGainValue = lfoGainValues[beatNumber];
+    var lfoGainValue = this.lfoGainValues[beatNumber];
     var secondsPerBeat = 60.0 / tempo;
     lfoGain.gain.setValueAtTime(lfoGainValue, time);
   }
 
   function scheduler() {
-    while (nextNoteTime < context.currentTime + scheduleAheadTime) {
+    while (nextNoteTime < this.context.currentTime + scheduleAheadTime) {
         scheduleNote(current16thNote, nextNoteTime);
         nextNote();
     }
@@ -60,13 +63,13 @@ function init() {
 
     // Decode asynchronously
     request.onload = function() {
-      context.decodeAudioData(request.response, onFinishedLoading, function(){});
+      this.context.decodeAudioData(request.response, onFinishedLoading, function(){});
     };
     request.send();
   }
 
   function onFinishedLoading(buffer) {
-    var source = context.createBufferSource(); // creates a sound source
+    var source = this.context.createBufferSource(); // creates a sound source
     source.buffer = buffer;                    // tell the source which sound to play
     source.loop = true;
 
@@ -123,7 +126,7 @@ function init() {
 
     for (k in eqParams) {
       function addEqNode(params) {
-        var bp = context.createBiquadFilter();
+        var bp = this.context.createBiquadFilter();
         bp.type = "bandpass";
         bp.frequency.value = eqParams[k].fq;
         bp.Q.value = eqParams[k].q || 1.8;
@@ -131,7 +134,8 @@ function init() {
 
         source.connect(bp);
 
-        var gain = context.createGain();
+        var gain = this.context.createGain();
+        this.gainNodes[k] = gain;
 
         bp.connect(gain);
         gain.connect(lfoGain);
@@ -151,5 +155,7 @@ function init() {
     source.start(0);                           // play the source now
   }
 
-  loadTrack("http://uncovered-proxy.herokuapp.com/mp3-preview/f60c420261754542594ddb4a46ed42972d2b9fd0");
-}
+  loadTrack(url);
+};
+
+module.exports = AudioJumbler;
