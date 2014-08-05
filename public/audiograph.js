@@ -10,7 +10,7 @@ function init() {
 
     // Decode asynchronously
     request.onload = function() {
-      context.decodeAudioData(request.response, onFinishedLoading, onError);
+      context.decodeAudioData(request.response, onFinishedLoading, function(){});
     };
     request.send();
   }
