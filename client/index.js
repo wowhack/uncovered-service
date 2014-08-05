@@ -39,7 +39,15 @@ window.shit = function() {
       }
 
       webAPI('/users/'+username+'/playlists/'+designatedPlaylistId, function(response) {
-          console.log("Found the playlist", response.tracks.items)
+        var rows = response.tracks.items
+        var imageUrls = rows.map(function(row) {
+          return row.track.album.images[1].url;
+        })
+
+        var randomUrl =
+          imageUrls[Math.floor(Math.random() * imageUrls.length-1) + 1]
+
+        console.image(randomUrl)
       })
 
     });
