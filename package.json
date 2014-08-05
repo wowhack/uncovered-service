@@ -2,7 +2,7 @@
   "name": "uncovered-service",
   "version": "1.0.0",
   "description": "A THING WITH THINGS AND MUSIC AND PÄR",
-  "main": "service.js",
+  "main": "./service.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
