@@ -1,6 +1,7 @@
 var audiojumbler = require('./audiojumbler');
 var quantize = require('./quantize');
 var fft = require('./fft');
+var featuremapping = require('./featuremapping');
 var range = require('mout/array/range');
 var domready = require('domready');
 
@@ -58,3 +59,5 @@ window.shit = function() {
 
 window.quantize = quantize;
 window.fft = fft;
+window.featuremapping = featuremapping(); // yeah
+window.audiojumbler = audiojumbler;

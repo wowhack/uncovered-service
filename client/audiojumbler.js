@@ -1,19 +1,28 @@
 function AudioJumbler() {
   this.url = null;
   this.context = new AudioContext();
-  this.lfoGainValues = [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+  this.lfoGainValues = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
   this.gainNodes = {};
 }
 
 AudioJumbler.prototype.setParams = function (lfoValues, fqValues) {
-  this.lfoValues = lfoValues;
-  fqValues.forEach(function (key, value) {
-                     this.gainNodes[key].gain.value = value;
-                   });
+  var self = this;
+  self.lfoGainValues = lfoValues;
+  for (k in self.gainNodes) {
+    var gainNode = self.gainNodes[k];
+    var node = k - 4;
+    if (node in fqValues) {
+      gainNode.gain.value = fqValues[node];
+    } else {
+      // Full gain
+      gainNode.gain.value = 1.0;
+    }
+  }
 };
 
 AudioJumbler.prototype.stop = function() {
-  this.context.stop();
+  var self = this;
+  self.context.stop();
 };
 
 AudioJumbler.prototype.start = function (url) {
@@ -27,10 +36,9 @@ AudioJumbler.prototype.start = function (url) {
   var nextNoteTime = 0.0;      // when the next note is due.
   var timerID = 0;             // setInterval identifier.
 
-  var lfoGain = this.context.createGain();
+  var lfoGain = self.context.createGain();
   lfoGain.gain.value = 0.0;
-  lfoGain.connect(this.context.destination);
-  var lfoGainValues = [0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+  lfoGain.connect(self.context.destination);
 
   function nextNote() {
     // Advance current note and time by a 16th note...
@@ -136,18 +144,11 @@ AudioJumbler.prototype.start = function (url) {
         source.connect(bp);
 
         var gain = self.context.createGain();
+        gain.gain.value = 0.0;
         self.gainNodes[k] = gain;
 
         bp.connect(gain);
         gain.connect(lfoGain);
-
-        // Remove this latorz
-        var elementId = 'slider-' + k;
-        document
-          .getElementById(elementId)
-          .addEventListener('change', function(e){
-                              gain.gain.value = e.srcElement.value;
-                            }, false );
       }
       addEqNode(eqParams[k]);
     }
