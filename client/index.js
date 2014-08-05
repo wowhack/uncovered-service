@@ -8,4 +8,4 @@ function init() {
   aj.start("http://uncovered-proxy.herokuapp.com/mp3-preview/f60c420261754542594ddb4a46ed42972d2b9fd0");
 }
 
-
+window.getAccessToken = require('../auth/client').getAccessToken
