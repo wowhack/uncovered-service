@@ -41,7 +41,7 @@ window.shit = function() {
       webAPI('/users/'+username+'/playlists/'+designatedPlaylistId, function(response) {
         var rows = response.tracks.items
         var imageUrls = rows.map(function(row) {
-          return row.track.album.images[1].url;
+          return row.track.album.images[2].url;
         })
 
         var randomUrl =
