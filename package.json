@@ -19,6 +19,7 @@
   "dependencies": {
     "faye": "~1.0.3",
     "connect": "~2.24.3",
-    "mout": "~0.9.1"
+    "mout": "~0.9.1",
+    "browserify": "^5.9.1"
   }
 }
