@@ -22,6 +22,5 @@ function init() {
     source.start(0);                           // play the source now
   }
 
-//  loadTrack("https://p.scdn.co/mp3-preview/f60c420261754542594ddb4a46ed42972d2b9fd0");
-  loadTrack("http://soundbible.com/grab.php?id=2058&type=mp3");
+  loadTrack("http://uncovered-proxy.herokuapp.com/mp3-preview/f60c420261754542594ddb4a46ed42972d2b9fd0");
 }
