@@ -41,17 +41,16 @@ function init() {
 
   function scheduleNote(beatNumber, time) {
     var lfoGainValue = lfoGainValues[beatNumber];
-    console.log(beatNumber + ": " + lfoGainValue);
     var secondsPerBeat = 60.0 / tempo;
     lfoGain.gain.setValueAtTime(lfoGainValue, time);
   }
 
   function scheduler() {
-    while (nextNoteTime < context.currentTime + scheduleAheadTime ) {
+    while (nextNoteTime < context.currentTime + scheduleAheadTime) {
         scheduleNote(current16thNote, nextNoteTime);
         nextNote();
     }
-    timerID = window.setTimeout( scheduler, lookahead );
+    timerID = window.setTimeout(scheduler, lookahead);
   }
 
   function loadTrack(url) {
@@ -139,12 +138,10 @@ function init() {
 
         // Remove this latorz
         var elementId = 'slider-' + k;
-        console.log(elementId);
         document
           .getElementById(elementId)
           .addEventListener('change', function(e){
                               gain.gain.value = e.srcElement.value;
-                              console.log(elementId + ": " + gain.gain.value);
                             }, false );
       }
       addEqNode(eqParams[k]);
