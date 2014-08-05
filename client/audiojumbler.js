@@ -2,7 +2,7 @@ function AudioJumbler() {
   this.url = null;
   this.context = new AudioContext();
   this.lfoGainValues = [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
-  this.gainNodes = null;
+  this.gainNodes = {};
 }
 
 AudioJumbler.prototype.setParams = function (lfoValues, fqValues) {
@@ -17,6 +17,7 @@ AudioJumbler.prototype.stop = function() {
 };
 
 AudioJumbler.prototype.start = function (url) {
+  var self = this;
   var current16thNote = 0;     // What note is currently last scheduled?
   var tempo = 120.0;           // tempo (in beats per minute)
   var lookahead = 25.0;        // How frequently to call scheduling function (in milliseconds)
@@ -43,13 +44,13 @@ AudioJumbler.prototype.start = function (url) {
   }
 
   function scheduleNote(beatNumber, time) {
-    var lfoGainValue = this.lfoGainValues[beatNumber];
+    var lfoGainValue = self.lfoGainValues[beatNumber];
     var secondsPerBeat = 60.0 / tempo;
     lfoGain.gain.setValueAtTime(lfoGainValue, time);
   }
 
   function scheduler() {
-    while (nextNoteTime < this.context.currentTime + scheduleAheadTime) {
+    while (nextNoteTime < self.context.currentTime + scheduleAheadTime) {
         scheduleNote(current16thNote, nextNoteTime);
         nextNote();
     }
@@ -63,13 +64,13 @@ AudioJumbler.prototype.start = function (url) {
 
     // Decode asynchronously
     request.onload = function() {
-      this.context.decodeAudioData(request.response, onFinishedLoading, function(){});
+      self.context.decodeAudioData(request.response, onFinishedLoading, function(){});
     };
     request.send();
   }
 
   function onFinishedLoading(buffer) {
-    var source = this.context.createBufferSource(); // creates a sound source
+    var source = self.context.createBufferSource(); // creates a sound source
     source.buffer = buffer;                    // tell the source which sound to play
     source.loop = true;
 
@@ -126,7 +127,7 @@ AudioJumbler.prototype.start = function (url) {
 
     for (k in eqParams) {
       function addEqNode(params) {
-        var bp = this.context.createBiquadFilter();
+        var bp = self.context.createBiquadFilter();
         bp.type = "bandpass";
         bp.frequency.value = eqParams[k].fq;
         bp.Q.value = eqParams[k].q || 1.8;
@@ -134,8 +135,8 @@ AudioJumbler.prototype.start = function (url) {
 
         source.connect(bp);
 
-        var gain = this.context.createGain();
-        this.gainNodes[k] = gain;
+        var gain = self.context.createGain();
+        self.gainNodes[k] = gain;
 
         bp.connect(gain);
         gain.connect(lfoGain);

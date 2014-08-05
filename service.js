@@ -43,6 +43,7 @@ app = express()
 
       // optional: ignore weird requires
       // b.ignore('./lib-cov/merge')
+      res.writeHead(200, { 'Content-Type': 'text/javascript' });
       b.bundle().pipe(res);
     }
 
