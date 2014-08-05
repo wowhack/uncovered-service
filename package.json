@@ -18,6 +18,7 @@
   "homepage": "https://github.com/wowhack/uncovered-service",
   "dependencies": {
     "faye": "~1.0.3",
-    "connect": "~2.24.3"
+    "connect": "~2.24.3",
+    "mout": "~0.9.1"
   }
 }

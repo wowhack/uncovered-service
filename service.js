@@ -7,6 +7,7 @@ server.listen(8000);
 var connect = require('connect')
   , http = require('http')
   , fs = require('fs')
+  , browserify = require('browserify')
 
 var cacheAge = process.env.NODE_ENV === 'production' ?  0 : 60 * 60 * 1000;
 
@@ -27,6 +28,19 @@ app = connect()
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(fs.readFileSync('./collision-example.html'));
     }
+
+    if (req.url === '/client') {
+      var b = browserify();
+      b.add('./client/index.js');
+
+      // optional: ignore weird requires
+      // b.ignore('./lib-cov/merge')
+
+      b.bundle().pipe(res);
+    }
+
+
+
     /*
     if (req.url === '/faye.js') {
       res.writeHead(200, { 'Content-Type': 'text/javascript' });
