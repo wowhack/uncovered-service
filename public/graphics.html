@@ -1,0 +1,62 @@
+<html>
+<head>
+  <style>
+  canvas#imageCanvas {
+    position: absolute;
+    left: 100px;
+    top: 100px;
+  }
+  canvas#coverCanvas {
+    position: absolute;
+    left: 500px;
+    top: 100px;
+  }
+  </style>
+</head>
+<body>
+
+<canvas id="imageCanvas" width="300" height="300"></canvas>
+<canvas id="coverCanvas" width="300" height="300"></canvas>
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="client.js"></script>
+
+<script>
+
+var IMAGE_URL = 'http://uncovered-proxy.herokuapp.com/image/8e13218039f81b000553e25522a7f0d7a0600f2e';
+
+var imageCanvas = document.getElementById("imageCanvas");
+var coverCanvas = document.getElementById("coverCanvas");
+
+var imageContext = imageCanvas.getContext('2d');
+var coverContext = coverCanvas.getContext('2d');
+
+var width = parseInt($(imageCanvas).attr('width'))
+var height = parseInt($(imageCanvas).attr('height'))
+
+// load image from data url
+var imageObj = new Image();
+imageObj.onload = function() {
+  imageContext.drawImage(this, 0, 0, width, height);
+
+  var imgData = imageContext.getImageData(0, 0, width, height);
+
+  var maxColors = 16;
+
+  var cmap = quantize.quantize(imgData.data, maxColors);
+  var newImgData = coverContext.createImageData(width, height);
+  for (var i = 0; i < imgData.data.length; i += 4) {
+    var pixel = cmap.map([imgData.data[i], imgData.data[i+1], imgData.data[i+2]]);
+    newImgData.data[i] = pixel[0];
+    newImgData.data[i + 1] = pixel[1];
+    newImgData.data[i + 2] = pixel[2];
+    newImgData.data[i + 3] = 255;
+  };
+  coverContext.putImageData(newImgData, 0, 0);
+};
+imageObj.crossOrigin="Anonymous";
+imageObj.src = IMAGE_URL;
+</script>
+</body>
+
+</html>
