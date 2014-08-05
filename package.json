@@ -1,0 +1,23 @@
+{
+  "name": "uncovered-service",
+  "version": "1.0.0",
+  "description": "A THING WITH THINGS AND MUSIC AND PÄR",
+  "main": "service.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wowhack/uncovered-service.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wowhack/uncovered-service/issues"
+  },
+  "homepage": "https://github.com/wowhack/uncovered-service",
+  "dependencies": {
+    "faye": "~1.0.3",
+    "connect": "~2.24.3"
+  }
+}
