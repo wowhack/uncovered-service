@@ -21,6 +21,12 @@ app = connect()
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(fs.readFileSync('./index.html'));
     }
+
+    if (req.url === '/example') {
+      // HTML is implied
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end(fs.readFileSync('./collision-example.html'));
+    }
     /*
     if (req.url === '/faye.js') {
       res.writeHead(200, { 'Content-Type': 'text/javascript' });

@@ -1,0 +1,85 @@
+<html>
+<head>
+  <style>
+  canvas {
+    position: absolute;
+    left: 100;
+    top: 100;
+  }
+  #imageCanvas {z-index: 1}
+  #coverCanvas {z-index: 2}
+  </style>
+</head>
+<body>
+
+<canvas id="imageCanvas" width="300" height="300"></canvas>
+<canvas id="coverCanvas" width="300" height="300"></canvas>
+
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+
+<script>
+
+var IMAGE_URL = 'https://d3rt1990lpmkn.cloudfront.net/unbranded/bca86acd1f3ddef6fe9f70d095cd72e4cdc1cc3e';
+
+var imageCanvas = document.getElementById("imageCanvas");
+var coverCanvas = document.getElementById("coverCanvas");
+
+var imageContext = imageCanvas.getContext('2d');
+var coverContext = coverCanvas.getContext('2d');
+
+var width = parseInt($(imageCanvas).attr('width'))
+var height = parseInt($(imageCanvas).attr('height'))
+
+// load image from data url
+var imageObj = new Image();
+imageObj.onload = function() {
+  imageContext.drawImage(this, 0, 0);
+};
+imageObj.src = IMAGE_URL;
+
+coverContext.fillStyle = "#FF0000";
+coverContext.fillRect(0,0,width,height);
+
+var isMouseDown = false;
+$(coverCanvas).mousedown(function(e) { isMouseDown = true })
+$(coverCanvas).mouseup(function(e) { isMouseDown = false })
+$(coverCanvas).mouseout(function(e) { isMouseDown = false })
+$(coverCanvas).mousemove(function(e) {
+  if (!isMouseDown) return;
+  var pos = {
+    x: e.offsetX,
+    y: e.offsetY
+  }
+  var strokeSize = 20;
+
+  // Clear the space
+  coverContext.clearRect(
+    pos.x - strokeSize / 2,
+    pos.y-strokeSize/2 ,
+    strokeSize,
+    strokeSize
+  );
+
+  var imgDataArray = coverContext.getImageData(0, 0, width, height).data;
+
+  // Flatten the RGBA array into an array of zeroes and ones
+  var bitArray = new Uint8ClampedArray(imgDataArray.length/4);
+  var j = 0;
+  for (var i=3;i<imgDataArray.length;i+=4) {
+    bitArray[j] = imgDataArray[i] === 0 ? 0 : 1;
+    j++;
+  }
+
+  var out = {
+    width: width,
+    height: height,
+    pixels: bitArray
+  }
+
+  console.log("this is nice output", out);
+
+})
+</script>
+</body>
+
+</html>
