@@ -19,6 +19,7 @@ AudioJumbler.prototype.setParams = function (lfoValues, fqValues) {
     if (node in fqValues) {
       var fqval = fqValues[k] - 1.0;
       gainNode.gain.value = Math.sqrt(1.0 - fqval*fqval);
+      console.log(gainNode.gain.value);
     } else {
       // Full gain
       gainNode.gain.value = 1.0;
@@ -42,9 +43,14 @@ AudioJumbler.prototype.start = function (url) {
   var nextNoteTime = 0.0;      // when the next note is due.
   var timerID = 0;             // setInterval identifier.
 
+  var compressor = self.context.createDynamicsCompressor();
+  compressor.ratio.value = 20.0;
+  compressor.threshold.value = -40.0;
+
   var lfoGain = self.context.createGain();
   lfoGain.gain.value = 0.0;
-  lfoGain.connect(self.context.destination);
+  lfoGain.connect(compressor);
+  compressor.connect(self.context.destination);
 
   function nextNote() {
     // Advance current note and time by a 16th note...
