@@ -23,17 +23,259 @@
 <canvas id="coverCanvas" width="300" height="300"></canvas>
 <canvas id="debugCanvas" width="300" height="300"></canvas>
 
+<button id="btn-0" type="button">Track 1</button>
+<button id="btn-1" type="button">Track 2</button>
+<button id="btn-2" type="button">Track 3</button>
+<button id="btn-3" type="button">Track 4</button>
+<button id="btn-4" type="button">Track 5</button>
+<p/>
+<button id="next" type="button">Start</button>
+
+<p>Points:<p id="score">0</p></p>
+<table id="scores"><tr><th>Scores:</th></tr></table>
+
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="client.js"></script>
 
 <script>
 
-var aj = new audiojumbler();
+var curtrack = 0;
+var lineup = [
+'http://open.spotify.com/track/4tc5UgZiIdz8LAISqEk1hP',
+'http://open.spotify.com/track/6bUNEbXT7HovLW6BgPCBsb',
+'http://open.spotify.com/track/5ik5nMy8vdS2rXe7SAGt2K',
+'http://open.spotify.com/track/2b712q3E27nyW6LGsZxr0y',
+'http://open.spotify.com/track/3AVZaAbDvR6rs2NN4n0aAF',
+'http://open.spotify.com/track/7oXRMDUzBPekkLRTJhSGvC',
+'http://open.spotify.com/track/63wO67nTejl5Ylh0EGkRBy',
+'http://open.spotify.com/track/0r2Yibyh603XOaXLDk3A08',
+'http://open.spotify.com/track/0QEHU0ZccfSXYUpF2iVUab',
+'http://open.spotify.com/track/48ubkDBO9GAFRkn3hXFHVt',
+'http://open.spotify.com/track/6idBMe9Ih8c6OZj1nJWyGo',
+'http://open.spotify.com/track/4jsCgpmMyph0onXF2Sh1zC',
+'http://open.spotify.com/track/3AszgPDZd9q0DpDFt4HFBy',
+'http://open.spotify.com/track/5gQuh120SIYBEtodVIOd4Q',
+'http://open.spotify.com/track/4QNyqU7sjfm5zBMmWprq6D',
+'http://open.spotify.com/track/55CenVQ4alvDJ1PS8aYB0m',
+'http://open.spotify.com/track/0PIXeBuPkFCpV0zAhLROoS',
+'http://open.spotify.com/track/3XWgwgbWDI56mf1Wl3cLzb',
+'http://open.spotify.com/track/26yRRQ1l9J2jhrCrPp3R1g',
+'http://open.spotify.com/track/34n6Ea7xmSq23tzClOer3w',
+'http://open.spotify.com/track/23FFL6bZWs5QtmxrRX3viv',
+'http://open.spotify.com/track/0X29aQOkq1VXmgA71NQxUn',
+'http://open.spotify.com/track/5d47h8XfBJ0nM68JdEFudI',
+'http://open.spotify.com/track/0FfIBtduLUoxi4XToomZpB',
+'http://open.spotify.com/track/4B6YFj53ELz6EoAJH8vGKZ',
+'http://open.spotify.com/track/1eTZQmiMtnoRrqwrjZE0Hy',
+'http://open.spotify.com/track/6J3j3xPe2WGzEx4LJMevv5',
+'http://open.spotify.com/track/5wnBiXSEvyCAptG42FlIYV',
+'http://open.spotify.com/track/4pgHZcnvB2SzfmkkmTaBIv',
+'http://open.spotify.com/track/2OsGdZYDdTK4pxDMsK0Blv',
+'http://open.spotify.com/track/00fNdIFKoMxxt8Hnm2kAKL',
+'http://open.spotify.com/track/06NT9JqSmJRY4X3lqZSEhU',
+'http://open.spotify.com/track/6Cr4GuonfqCCFIqSSOGTBG',
+'http://open.spotify.com/track/0YYplFi5hpYVHFrLu94cle',
+'http://open.spotify.com/track/5RlSc9SkmmV1Ma4Hd7TQYZ',
+'http://open.spotify.com/track/343aWbF8rm23ibamGJcNbR',
+'http://open.spotify.com/track/32W1K50AaXGXoRBn3Zyax4',
+'http://open.spotify.com/track/7wE4l1GNxjE2kOmlsx0PcA',
+'http://open.spotify.com/track/6hBmL5yVbXDHSWX6GbuogP',
+'http://open.spotify.com/track/3s4U7OHV7gnj42VV72eSZ6',
+'http://open.spotify.com/track/0I3q5fE6wg7LIfHGngUTnV',
+'http://open.spotify.com/track/5JINdSYACfI2OE3NUPHLY6',
+'http://open.spotify.com/track/5VVuxxuQIJD0pjjFls1DKL',
+'http://open.spotify.com/track/0aFRdR1dLOk2hIipVbehXx',
+'http://open.spotify.com/track/3UNPA9XgUNAStNazmC67yF',
+'http://open.spotify.com/track/2EiYek3EgcBc0ggxU4qJqB',
+'http://open.spotify.com/track/6CHb6W77P3EWRsMcEKmi8q',
+'http://open.spotify.com/track/2N7LcpJoYo7WWTueTW9KyX',
+'http://open.spotify.com/track/1E2WJTB1Gyca1pqo6dcLm0',
+'http://open.spotify.com/track/3uOM0nNQiWDP1oUnjCSax3',
+'http://open.spotify.com/track/6rqONVHOT73QecUdJ5HVHy',
+'http://open.spotify.com/track/2HJhE2XidozbIzppIFPeIn',
+'http://open.spotify.com/track/3t9TKPG5i39vmZsdczl1vN',
+'http://open.spotify.com/track/5IM1TAhZ0tGhPketsWMC02',
+'http://open.spotify.com/track/5OBb8hxS8BLpyXl7KUM8hJ',
+'http://open.spotify.com/track/1qOROGSTTH8HfCTukMCu0B',
+'http://open.spotify.com/track/15IBg6u4ID3dlLWjFW9TyT',
+'http://open.spotify.com/track/6gO1BlMsbylhPTtUKtqCGE',
+'http://open.spotify.com/track/4jhCjycvMSlD9BNW1pmJA7',
+'http://open.spotify.com/track/7zGoonnWJtOCb7jHR1kU1F',
+'http://open.spotify.com/track/5EEA331MR5HiFnO913oIox',
+'http://open.spotify.com/track/601KiLiZtBJRTXBrTjeieP',
+'http://open.spotify.com/track/7GEidxhfGNteiW9n0kLyxH',
+'http://open.spotify.com/track/1vOMVuIa9B7G5MRK40mcE1',
+'http://open.spotify.com/track/5AJpBCHCw9RTs6v4YHhh3Y',
+'http://open.spotify.com/track/3WibbMr6canxRJXhNtAvLU',
+'http://open.spotify.com/track/6Fhopbr9AGXSEUO2T7kcKu',
+'http://open.spotify.com/track/3EAUSlUzVTLhxLn8Fhpz5V',
+'http://open.spotify.com/track/4GGw2WhvFOniMdAl8ZLpVW',
+'http://open.spotify.com/track/1wQOGMKsCK7X99DR1H20Br',
+'http://open.spotify.com/track/1uZIlkSH9SAPwjW49JKANP',
+'http://open.spotify.com/track/5dzV75f9qVXVvdXLTqIG4L',
+'http://open.spotify.com/track/0ZO7c5TPbWmdXMYcNgyAK6',
+'http://open.spotify.com/track/3ZbvdEDmVXpPgdBCef9gFe',
+'http://open.spotify.com/track/6KdwBL0OFecxLc1cSV9WVp',
+'http://open.spotify.com/track/123W7snVRuONLwn2uMdJB3',
+'http://open.spotify.com/track/2lj5pcIPXnFiSRbITbVfcz',
+'http://open.spotify.com/track/7cmMZ45nWU8JtvdIzgXlli',
+'http://open.spotify.com/track/6hDjYcGWihB1FxwzXgeCWr',
+'http://open.spotify.com/track/2vWUDU4IBLbfm3PWTvtXM9',
+'http://open.spotify.com/track/1XFNRFRpzpBAc9ja6oMUoz',
+'http://open.spotify.com/track/0Zw4llKeB35SIKASy1aLtV',
+'http://open.spotify.com/track/24ffpObta6LOAOVRhqcCq5',
+'http://open.spotify.com/track/7fyIqNm4z8xf32WnH5d289',
+'http://open.spotify.com/track/6AnEE4npTEjvDrTpQdCMqS',
+'http://open.spotify.com/track/3cr2ObVsLULmGVt7yrrcXJ',
+'http://open.spotify.com/track/4E8vi5aFYywo5g8ZS4xQvN',
+'http://open.spotify.com/track/1rawzbVmF2XqJd3697tTdt',
+'http://open.spotify.com/track/14QIBCmPxZtU6YAyPxNQ5a',
+'http://open.spotify.com/track/5ym6WRBwi1hwr08jPcJQku',
+'http://open.spotify.com/track/4bt4OpCeFt2u0luzdUkYDo',
+'http://open.spotify.com/track/39XEEJejJT9v4u8MGsTNup',
+'http://open.spotify.com/track/1ljzHUgt2SU2ADkhfa9eBC',
+'http://open.spotify.com/track/6VCqx14OVaX9uwSvC0PvAG',
+'http://open.spotify.com/track/6GZztnaEIbtDSlR6HahENG',
+'http://open.spotify.com/track/4K591MekCvrzcNJ6R4IIoR',
+'http://open.spotify.com/track/4vLHybifhq2shBdoffDU1B',
+'http://open.spotify.com/track/7grHqyOTbmIXXRsnLkaz6h',
+'http://open.spotify.com/track/1oKsHUHtU0jsbbBbLBQwY1',
+'http://open.spotify.com/track/4JZYNdatNCeyLTMXArSa5Y',
+'http://open.spotify.com/track/3LOgh7Jj1tS6XD8OszPHvh',
+'http://open.spotify.com/track/2CLtQ937VJcxhMpiGLB7Jy',
+'http://open.spotify.com/track/6xLsZuv2uoZHsmfBZCvfIQ',
+'http://open.spotify.com/track/4LKO7vmJiuGvsAImvf092l',
+'http://open.spotify.com/track/1r5uZGrPb4IB9NTOWfeqta',
+'http://open.spotify.com/track/0wgJsIZ4Bky4ZYdm74gsZC',
+'http://open.spotify.com/track/6gf7WF9nXNON9HdNtrdEDq',
+'http://open.spotify.com/track/0syrVcqLQMBMbj8VbthLA7',
+'http://open.spotify.com/track/6CfUJrawW1KHnh4VkZvuwx',
+'http://open.spotify.com/track/4JgqbL6hsmhM1PdOFxrH1S',
+'http://open.spotify.com/track/3O220xHBIQsN1mhqzpEPSJ',
+'http://open.spotify.com/track/4IH1ns1JlTslYVaKtT0uz7',
+'http://open.spotify.com/track/4Yu6DuP9vf6fhW94WSmxcz',
+'http://open.spotify.com/track/6wui9PGdTVyINVIbK24Nad',
+'http://open.spotify.com/track/6teNxpsKa9WL8lknJ0b3Gf',
+'http://open.spotify.com/track/3Zw7a2Rwvcwd5VU1VKJg35',
+'http://open.spotify.com/track/0wzRcekWyVCSyPtlPOeJau',
+'http://open.spotify.com/track/79K0uACSGriTCwNSvjA7vZ',
+'http://open.spotify.com/track/7eClkLWbrr3TorYedzaDkI',
+'http://open.spotify.com/track/5zplZXUwLC4KbcQTel93vB',
+'http://open.spotify.com/track/1WRV8yp08cYHcvdEwuS0cU',
+'http://open.spotify.com/track/6cip2W4NqtQA35lJdLGz3g',
+'http://open.spotify.com/track/1K7o9gppQ5nbfkw4wpkARg',
+'http://open.spotify.com/track/71CFZjdSm2WSh5S6TPd69A',
+'http://open.spotify.com/track/1VE58PLLhJjgQ28l8c0Art',
+'http://open.spotify.com/track/5JpNSjRIGjXmeiE45CBc6g',
+'http://open.spotify.com/track/6Ou08NE0N5z8eRL1siDtAK',
+'http://open.spotify.com/track/0aajuOTAcx24bnSar8jAYp',
+'http://open.spotify.com/track/3h6jD2Yl4sI6RnFsT92mTu',
+'http://open.spotify.com/track/7GLxQbmNdZMsO6AjuzwuNk',
+'http://open.spotify.com/track/6McZ8E4Ynivc55BbDCzaAJ',
+'http://open.spotify.com/track/3ZEXTCyeUkyZ9ZVaxpoC8w',
+'http://open.spotify.com/track/4Fz8Wvjp407Zoh4UacvgRp',
+'http://open.spotify.com/track/5oB28blWwVuLeSxKsi8mZ5',
+'http://open.spotify.com/track/25SJaCCPiosugnlY53VhRG',
+'http://open.spotify.com/track/6PZhPSeV4ndaMhZ65n2TL8',
+'http://open.spotify.com/track/0rYDR7DUXGa9Snc1sO5mgT',
+'http://open.spotify.com/track/7bVrNm06QuNOvxnTe02Ziq',
+'http://open.spotify.com/track/0Etl0p4Z6doS0xFxqdhrOn',
+'http://open.spotify.com/track/1CBcI3hzpgZ5ATIPBHeRfh',
+'http://open.spotify.com/track/0UzQ3kzHzp1O0LNkkUX9Lt',
+'http://open.spotify.com/track/2H2A5X1two6MOkk9JHtsOB',
+'http://open.spotify.com/track/6VZfMPn33u0NI0EzftvyBM',
+'http://open.spotify.com/track/0kn5weRAQD1RGv0eJMGPC5',
+'http://open.spotify.com/track/6QaZMsMcWwvxQETSSzUPem',
+'http://open.spotify.com/track/6cS2reOYomC1kVSeNR9Isp',
+'http://open.spotify.com/track/7l3cwO1k5sKp92uU0yIRK4',
+'http://open.spotify.com/track/37GF2hoWCCGUI2naw2ZVZw',
+'http://open.spotify.com/track/1GzCciagfjETjKrDBtX4Wb',
+'http://open.spotify.com/track/2WG1viSIDuppYqxCDjfq7n',
+'http://open.spotify.com/track/3q8WojYJVZsGClFGFBYdTc',
+'http://open.spotify.com/track/5sr8bKI359l6qujw4AJ9Uv',
+'http://open.spotify.com/track/18X4vn1UHaLRsmqDR24EVf',
+'http://open.spotify.com/track/4G41S8KXms7vAmIFsE2l4G',
+'http://open.spotify.com/track/4DQ3OmA5tnuTvZF8Mn8Jgz',
+'http://open.spotify.com/track/65ym1HrzBDTUuHbkBotBUQ',
+'http://open.spotify.com/track/1so4o7m1VULVRLaGJ2Ju2O',
+'http://open.spotify.com/track/44ZW9VlfVnidA7crWnLV9S',
+'http://open.spotify.com/track/4bpvJF05Zjz4TcPRuUufSC',
+'http://open.spotify.com/track/18Ft1qztKQKZED58OIVgw3',
+'http://open.spotify.com/track/2ov1PCGY0y3s3JF43XRv9f',
+'http://open.spotify.com/track/0Syg0S75x10U5F54ypxE6X',
+'http://open.spotify.com/track/2OmWeN3e7zL5g2Qb19952A',
+'http://open.spotify.com/track/3QvFbHW86wf5Bkvuaab8KI',
+'http://open.spotify.com/track/5CqmSwn8D1DuleBV1fOiCG',
+'http://open.spotify.com/track/1NFf7lr6qkaIcVdarllT2D',
+'http://open.spotify.com/track/4IVvOO90lB9qI1Cho451ZV',
+'http://open.spotify.com/track/1JcTaK0kZYb0Mt5FFsj2lV',
+'http://open.spotify.com/track/1dBBN7XhIBLX2UNTZgJ8t0',
+'http://open.spotify.com/track/4qlMtMS6QlqSxOTvN6PqiS',
+'http://open.spotify.com/track/3lcG2ak2Fv85SkZuHjFqNl',
+'http://open.spotify.com/track/0NqcFphBRDxAXmlkRGHPDz',
+'http://open.spotify.com/track/5iksrMqOdAjYrZZsjITSyz',
+'http://open.spotify.com/track/7KfYLvSzNAy7iJEisQS0Ma',
+'http://open.spotify.com/track/2qxDVthzyNA2rbGuOCaNBK',
+'http://open.spotify.com/track/4k2PKSCRalAY5gHplwZbju',
+'http://open.spotify.com/track/4R3pB7jE4mN7fDpHRbuu02',
+'http://open.spotify.com/track/7bsVGy5w8OpkXXo5DtgmUV',
+'http://open.spotify.com/track/2AaOCobndaVb5jjPjwtk0k',
+'http://open.spotify.com/track/4bwTxBCJXhjGOn7AzcArBY',
+'http://open.spotify.com/track/4008dpmqe3536dNu10BVAM',
+'http://open.spotify.com/track/6E7iRGNktMqldliwMbF1Xg',
+'http://open.spotify.com/track/2lKSJv4L16VdbhWmy68KwH',
+'http://open.spotify.com/track/3fj5W7oDAv8RzGdidy4nfn',
+'http://open.spotify.com/track/6hRB1Sa5FKwW3N2fSMahs4',
+'http://open.spotify.com/track/0C9LFV9Wsdd4xLn2DYHLD9',
+'http://open.spotify.com/track/0btTmTHYMbEVaJRgIiMmy5',
+'http://open.spotify.com/track/1z50DYHmCW0mqN7JDaS1Nv',
+'http://open.spotify.com/track/0qQXSWZU1FNAKyo4bF0Uyi',
+'http://open.spotify.com/track/1Njupmlmekzd9GUnxLtDlW',
+'http://open.spotify.com/track/2WYUZcrkZuyXGgKE05UhEC',
+'http://open.spotify.com/track/5aJsnDkoA8ZrUDWQn892KU',
+'http://open.spotify.com/track/12NjSwoyYGPDYSSCMK4qbs',
+'http://open.spotify.com/track/10Po5yXmK6BqnGr7opDD47',
+'http://open.spotify.com/track/284bMQBaOBbW0X9k1JSLt3',
+'http://open.spotify.com/track/4ZiYIQq0WUPMGMtbVMZoMb',
+'http://open.spotify.com/track/492YZblVU9iBCWKsH60sWP',
+'http://open.spotify.com/track/0Syg0S75x10U5F54ypxE6X',
+'http://open.spotify.com/track/7b3VxDuetUVSvLDYqr7B2y',
+'http://open.spotify.com/track/2kOTgiY7BlXF7wKo65mL7a',
+'http://open.spotify.com/track/1vmag95aTfSqkAbjlmdAfb',
+'http://open.spotify.com/track/7kmna8LKfhNW7lD99K5NJb',
+'http://open.spotify.com/track/1sQxrKrojCSuBk6XuaT8vm',
+'http://open.spotify.com/track/3z0aJbNxAH5V8IDMbiA0R1',
+'http://open.spotify.com/track/2T4JE91t7Js1DJ4rSHltcQ',
+'http://open.spotify.com/track/6H179fTdaQXT4QHnNxNX4D',
+'http://open.spotify.com/track/4ChT0BU6IK5P210I6AHFm2',
+'http://open.spotify.com/track/5LfYqoYh8geruxAwnnkWtU',
+'http://open.spotify.com/track/69PWzuaQqtmRmPcvH0Y6Bv',
+'http://open.spotify.com/track/3ueogJZSri4sdyNhZUgsJq',
+'http://open.spotify.com/track/44eQkbofZeY7rEPnPdobwa',
+'http://open.spotify.com/track/5FTFQKrYOirE6kFcuPHlat',
+'http://open.spotify.com/track/1U92my55XrL64mog5JGODC',
+'http://open.spotify.com/track/64ammk1zOgKRYjFPDDp9oj',
+'http://open.spotify.com/track/5aIBDAZQECTpru9YRuOElD',
+'http://open.spotify.com/track/0rtI64Es7L5muAOKIcvO9U',
+'http://open.spotify.com/track/1xlucvftYF0Lh0byYEQaLV'];
+lineup = shuffle(lineup);
 
-function start(imageUrl, previewUrl) {
+var aj = new audiojumbler();
+var scoreTimer;
+var uncovered = 0;
+var currentScore = 0;
+
+ $('#next').click(next);
+
+function start(imageUrl, previewUrl, artist, name, similar) {
   var imageCanvas = document.getElementById("imageCanvas");
   var coverCanvas = document.getElementById("coverCanvas");
   var debugCanvas = document.getElementById("debugCanvas");
+  var btns = [document.getElementById("btn-0"),
+              document.getElementById("btn-1"),
+              document.getElementById("btn-2"),
+              document.getElementById("btn-3"),
+              document.getElementById("btn-4")];
 
   var imageContext = imageCanvas.getContext('2d');
   var coverContext = coverCanvas.getContext('2d');
@@ -44,6 +286,61 @@ function start(imageUrl, previewUrl) {
 
   var palettized;
   var frequencies;
+
+  console.log(typeof similar);
+  if (typeof similar === "string" || similar.length < 4) {
+    next();
+    return;
+  }
+
+  var alts = [{artist: artist, name: name, correct: 1}]
+  for (k in similar) {
+    if (k > 4)
+      break;
+    alts.push({artist: similar[k].artist.name, name: similar[k].name, correct: 0});
+  }
+
+  currentScore =  0;
+  uncovered = 0;
+  total = width * height;
+
+  console.log(alts);
+
+  alts = shuffle(alts);
+
+  function appendScore(val) {
+    $('#scores tr:last').after('<tr><td>' + val + '</td></tr>');
+  }
+
+  for (k in alts) {
+    $(btns[k]).text(alts[k].artist + " - " + alts[k].name);
+    $(btns[k]).unbind();
+    if (alts[k].correct == 1) {
+      $(btns[k]).click(function() {
+        clearInterval(scoreTimer);
+        appendScore(currentScore);
+        aj.stop();
+        $('#next').prop("disabled", false);
+      });
+    } else {
+      $(btns[k]).click(function() {
+        clearInterval(scoreTimer);
+        console.log("appending score for", curtrack);
+        appendScore(0);
+        aj.stop();
+        $('#next').prop("disabled", false);
+      });
+    }
+  }
+
+  var startedAt = Date.now();
+
+  // Score updater
+  console.log("setting score timer");
+  scoreTimer = setInterval(function() {
+    currentScore = (total - uncovered) + Math.max(0, 60 * 1000 + startedAt - Date.now());
+    $('#score').text(currentScore);
+  }, 10);
 
   // load image from data url
   var imageObj = new Image();
@@ -107,8 +404,10 @@ function start(imageUrl, previewUrl) {
     var pltsums = new Float32Array(pltlen);
     var fqsums = new Float32Array(fqlen);
 
+    uncovered = 0;
     for (var i = 0; i < pxlen; i += 4) {
       if (pixels[i] == 0) {
+        uncovered += 1;
         var pixelix = i / 4;
         for (var k = 0; k < pltlen; ++k) {
           pltsums[k] += palettized[k][pixelix];
@@ -131,12 +430,15 @@ function stop() {
 function restart(track) {
   stop();
   testTrack(track, function(obj) {
-    start(obj.album_image.url, obj.audio_preview_url);
+    console.log(obj);
+    start(obj.album_image.url, obj.audio_preview_url, obj.artist, obj.name, obj.similar_tracks.similartracks.track);
   });
 }
 
-restart('http://open.spotify.com/track/66e6O0B9GmSRNAnzB0Bm74')
-//restart('http://open.spotify.com/track/0pLvr6YsKHnu8HmHKfrKOa');
+function next() {
+  $('#next').prop("disabled", true);
+  restart(lineup[curtrack++]);
+}
 </script>
 </body>
 

@@ -3,6 +3,7 @@ var quantize = require('./quantize');
 var fft = require('./fft');
 var featuremapping = require('./featuremapping');
 var range = require('mout/array/range');
+var shuffle = require('mout/array/shuffle');
 var domready = require('domready');
 
 domready(function () {
@@ -12,6 +13,24 @@ domready(function () {
 
 window.getAccessToken = require('../auth/client').getAccessToken
 
+function encodeQueryData(data) {
+   var ret = [];
+   for (var d in data)
+      ret.push(encodeURIComponent(d) + "=" + encodeURIComponent(data[d]));
+   return ret.join("&");
+}
+
+function similarTracks(artist, track, success) {
+  var params = {method: 'track.getsimilar', artist: artist, track: track, api_key: '3b187fbc8f2478d4eb3230d1f52c6cee', format: 'json'};
+  var url = 'http://ws.audioscrobbler.com/2.0/?' + encodeQueryData(params);
+  $.ajax({
+     url: url,
+     success: success,
+     error: function() {
+       console.warn("ERORROROOR", arguments)
+     }
+ });
+}
 
 function webAPI(path, token, success) {
   var headers = {}
@@ -62,12 +81,19 @@ window.shit = function() {
 window.testTrack = function(trackURL, callback) {
   var trackId = trackURL.split('/')[4];
 
-  webAPI('/tracks/'+trackId, null, function(response) {
-    callback({
-      album_image: response.album.images[0],
-      audio_preview_url: response.preview_url
-    })
-  });
+  webAPI('/tracks/'+trackId, null,
+         function(response) {
+           similarTracks(response.artists[0].name, response.name,
+                         function (simResponse) {
+                           callback({
+                                      album_image: response.album.images[0],
+                                      audio_preview_url: response.preview_url,
+                                      artist: response.artists[0].name,
+                                      name: response.name,
+                                      similar_tracks: simResponse
+                                    });
+                         });
+         });
 }
 
 window.bohrarper = function() {
@@ -82,3 +108,4 @@ window.quantize = quantize;
 window.fft = fft;
 window.featuremapping = featuremapping(); // yeah
 window.audiojumbler = audiojumbler;
+window.shuffle = shuffle;
