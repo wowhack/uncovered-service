@@ -8,96 +8,135 @@
   }
   #imageCanvas {z-index: 1}
   #coverCanvas {z-index: 2}
+  canvas#debugCanvas {
+    position: absolute;
+    left: 600px;
+    top: 100px;
+  }
+  #imageCanvas {z-index: 1}
+  #coverCanvas {z-index: 2}
   </style>
 </head>
 <body>
 
 <canvas id="imageCanvas" width="300" height="300"></canvas>
 <canvas id="coverCanvas" width="300" height="300"></canvas>
+<canvas id="debugCanvas" width="300" height="300"></canvas>
 
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="client.js"></script>
 
 <script>
 
-var IMAGE_URL = 'http://uncovered-proxy.herokuapp.com/image/6885bc64100c07ec425b6902eeb88c6c0fde6f89';
-var PREVIEW_URL = 'http://uncovered-proxy.herokuapp.com/mp3-preview/15c7cefeba3b74ff89f1ec93872d951cb88b26f9'
-
-var imageCanvas = document.getElementById("imageCanvas");
-var coverCanvas = document.getElementById("coverCanvas");
-
-var imageContext = imageCanvas.getContext('2d');
-var coverContext = coverCanvas.getContext('2d');
-
-var width = parseInt($(imageCanvas).attr('width'))
-var height = parseInt($(imageCanvas).attr('height'))
-
-var palettized;
-var frequencies;
-
 var aj = new audiojumbler();
 
-// load image from data url
-var imageObj = new Image();
-imageObj.onload = function() {
-  imageContext.drawImage(this, 0, 0, width, height);
-  var pixels = imageContext.getImageData(0, 0, width, height).data;
-  palettized = featuremapping.extractPalettized(pixels, width, height);
-  frequencies = featuremapping.extractFrequencies(pixels, width, height);
+function start(imageUrl, previewUrl) {
+  var imageCanvas = document.getElementById("imageCanvas");
+  var coverCanvas = document.getElementById("coverCanvas");
+  var debugCanvas = document.getElementById("debugCanvas");
 
-  // Everything analyzed, start music
-  aj.start(PREVIEW_URL);
-};
-imageObj.crossOrigin="Anonymous";
-imageObj.src = IMAGE_URL;
+  var imageContext = imageCanvas.getContext('2d');
+  var coverContext = coverCanvas.getContext('2d');
+  var debugContext = debugCanvas.getContext('2d');
 
-coverContext.fillStyle = "#FF0000";
-coverContext.fillRect(0,0,width,height);
+  var width = parseInt($(imageCanvas).attr('width'));
+  var height = parseInt($(imageCanvas).attr('height'));
 
-var isMouseDown = false;
-$(coverCanvas).mousedown(function(e) { isMouseDown = true })
-$(coverCanvas).mouseup(function(e) { isMouseDown = false })
-$(coverCanvas).mouseout(function(e) { isMouseDown = false })
-$(coverCanvas).mousemove(function(e) {
-  if (!isMouseDown) return;
-  var pos = {
-    x: e.offsetX,
-    y: e.offsetY
-  }
-  var strokeSize = 20;
+  var palettized;
+  var frequencies;
 
-  // Clear the space
-  coverContext.clearRect(
-    pos.x - strokeSize / 2,
-    pos.y-strokeSize/2 ,
-    strokeSize,
-    strokeSize
-  );
+  // load image from data url
+  var imageObj = new Image();
+  imageObj.onload = function() {
+    imageContext.drawImage(this, 0, 0, width, height);
+    var pixels = imageContext.getImageData(0, 0, width, height).data;
+    palettized = featuremapping.extractPalettized(pixels, width, height);
+    frequencies = featuremapping.extractFrequencies(pixels, width, height);
 
-  var pixels = coverContext.getImageData(0, 0, width, height).data;
+    <!-- var dbgImg = debugContext.createImageData(width, height); -->
+    <!-- var ix = 0; -->
+    <!-- var palix = 2; -->
+    <!-- console.log(palettized[palix]) -->
+    <!-- for (k in palettized[palix]) { -->
+    <!--    var val = palettized[palix][k]; -->
+    <!--    if (val != 0) -->
+    <!--      val = 255; -->
+    <!--    dbgImg.data[ix++] = val; -->
+    <!--    dbgImg.data[ix++] = val; -->
+    <!--    dbgImg.data[ix++] = val; -->
+    <!--    dbgImg.data[ix++] = 255; -->
+    <!-- } -->
+    <!-- debugContext.putImageData(dbgImg, 0, 0); -->
+    <!-- debugContext.fillStyle = "#FF0000"; -->
+    <!-- debugContext.fillRect(0,0,width,height); -->
 
-  var pxlen = pixels.length;
-  var pltlen = palettized.length;
-  var fqlen = frequencies.length;
-  var pltsums = new Float32Array(pltlen);
-  var fqsums = new Float32Array(fqlen);
+    // Everything analyzed, start music
+    aj.start(previewUrl);
+  };
+  imageObj.crossOrigin="Anonymous";
+  imageObj.src = imageUrl;
 
-  for (var i = 0; i < pxlen; i += 4) {
-    if (pixels[i] == 0) {
-      var pixelix = i / 4;
-      for (var k = 0; k < pltlen; ++k) {
-        pltsums[k] += palettized[k][pixelix];
-      }
-      for (var m = 0; m < fqlen; ++m) {
-        fqsums[m] += frequencies[m][pixelix];
+  coverContext.fillStyle = "#FF0000";
+  coverContext.fillRect(0,0,width,height);
+
+  var isMouseDown = false;
+  $(coverCanvas).mousedown(function(e) { isMouseDown = true });
+  $(coverCanvas).mouseup(function(e) { isMouseDown = false });
+  $(coverCanvas).mouseout(function(e) { isMouseDown = false });
+  $(coverCanvas).mousemove(function(e) {
+    if (!isMouseDown) return;
+    var pos = {
+      x: e.offsetX,
+      y: e.offsetY
+    };
+    var strokeSize = 20;
+
+    // Clear the space
+    coverContext.clearRect(
+      pos.x - strokeSize / 2,
+      pos.y-strokeSize/2 ,
+      strokeSize,
+      strokeSize
+    );
+
+    var pixels = coverContext.getImageData(0, 0, width, height).data;
+
+    var pxlen = pixels.length;
+    var pltlen = palettized.length;
+    var fqlen = frequencies.length;
+    var pltsums = new Float32Array(pltlen);
+    var fqsums = new Float32Array(fqlen);
+
+    for (var i = 0; i < pxlen; i += 4) {
+      if (pixels[i] == 0) {
+        var pixelix = i / 4;
+        for (var k = 0; k < pltlen; ++k) {
+          pltsums[k] += palettized[k][pixelix];
+        }
+        for (var m = 0; m < fqlen; ++m) {
+          fqsums[m] += frequencies[m][pixelix];
+        }
       }
     }
-  }
 
-  aj.setParams(pltsums, fqsums);
+    aj.setParams(pltsums, fqsums);
 //  aj.setParams([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], fqsums);
+  });
+}
 
-})
+function stop() {
+  aj.stop();
+}
+
+function restart(track) {
+  stop();
+  testTrack(track, function(obj) {
+    start(obj.album_image.url, obj.audio_preview_url);
+  });
+}
+
+restart('http://open.spotify.com/track/66e6O0B9GmSRNAnzB0Bm74')
+//restart('http://open.spotify.com/track/0pLvr6YsKHnu8HmHKfrKOa');
 </script>
 </body>
 

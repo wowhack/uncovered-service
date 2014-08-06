@@ -1,6 +1,7 @@
 function AudioJumbler() {
   this.url = null;
   this.context = new AudioContext();
+  this.source = null;
   this.lfoGainValues = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 //  this.lfoGainValues = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
   this.gainNodes = {};
@@ -10,6 +11,7 @@ AudioJumbler.prototype.setParams = function (lfoValues, fqValues) {
   var self = this;
   // Use log of values
   for (m in lfoValues) {
+    // self.lfoGainValues[m] = lfoValues[m];
     var val = lfoValues[m] - 1.0;
     self.lfoGainValues[m] = Math.sqrt(1.0 - val*val);
   }
@@ -19,7 +21,6 @@ AudioJumbler.prototype.setParams = function (lfoValues, fqValues) {
     if (node in fqValues) {
       var fqval = fqValues[k] - 1.0;
       gainNode.gain.value = Math.sqrt(1.0 - fqval*fqval);
-      console.log(gainNode.gain.value);
     } else {
       // Full gain
       gainNode.gain.value = 1.0;
@@ -29,7 +30,8 @@ AudioJumbler.prototype.setParams = function (lfoValues, fqValues) {
 
 AudioJumbler.prototype.stop = function() {
   var self = this;
-  self.context.stop();
+  if (self.source)
+    self.source.stop();
 };
 
 AudioJumbler.prototype.start = function (url) {
@@ -91,6 +93,7 @@ AudioJumbler.prototype.start = function (url) {
 
   function onFinishedLoading(buffer) {
     var source = self.context.createBufferSource(); // creates a sound source
+    self.source = source;
     source.buffer = buffer;                    // tell the source which sound to play
     source.loop = true;
 
