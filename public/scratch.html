@@ -3,7 +3,7 @@
   <style>
   canvas {
     position: absolute;
-    left: 100;
+    left: 600;
     top: 100;
   }
   #imageCanvas {z-index: 1}
@@ -11,7 +11,7 @@
   canvas#debugCanvas {
     position: absolute;
     left: 600px;
-    top: 100px;
+    top: 600px;
   }
   #imageCanvas {z-index: 1}
   #coverCanvas {z-index: 2}
@@ -32,7 +32,7 @@
 <button id="next" type="button">Start</button>
 
 <p>Points:<p id="score">0</p></p>
-<table id="scores"><tr><th>Scores:</th></tr></table>
+<table id="scores"><tr><td>score</td><td>answer</td><td>correct</td></tr></table>
 
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script src="client.js"></script>
@@ -293,7 +293,8 @@ function start(imageUrl, previewUrl, artist, name, similar) {
     return;
   }
 
-  var alts = [{artist: artist, name: name, correct: 1}]
+  var correct = {artist: artist, name: name, correct: 1};
+  var alts = [correct]
   for (k in similar) {
     if (k > 4)
       break;
@@ -308,17 +309,18 @@ function start(imageUrl, previewUrl, artist, name, similar) {
 
   alts = shuffle(alts);
 
-  function appendScore(val) {
-    $('#scores tr:last').after('<tr><td>' + val + '</td></tr>');
+  function appendScore(val, answer, correct) {
+    $('#scores tr:last').after('<tr><td>' + val + '</td><td>' + answer + '</td><td>' + correct + '</td></tr>');
   }
 
-  for (k in alts) {
+  alts.forEach(function (value, k) {
     $(btns[k]).text(alts[k].artist + " - " + alts[k].name);
     $(btns[k]).unbind();
     if (alts[k].correct == 1) {
       $(btns[k]).click(function() {
+        var answer = alts[k];
         clearInterval(scoreTimer);
-        appendScore(currentScore);
+        appendScore(currentScore, answer.artist + ' - ' + answer.name, correct.artist + ' - ' + correct.name);
         aj.stop();
         $('#next').prop("disabled", false);
       });
@@ -326,12 +328,13 @@ function start(imageUrl, previewUrl, artist, name, similar) {
       $(btns[k]).click(function() {
         clearInterval(scoreTimer);
         console.log("appending score for", curtrack);
-        appendScore(0);
+        var answer = alts[k];
+        appendScore(0, answer.artist + ' - ' + answer.name, correct.artist + ' - ' + correct.name);
         aj.stop();
         $('#next').prop("disabled", false);
       });
     }
-  }
+  });
 
   var startedAt = Date.now();
 
