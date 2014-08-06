@@ -296,7 +296,7 @@ function start(imageUrl, previewUrl, artist, name, similar) {
   var correct = {artist: artist, name: name, correct: 1};
   var alts = [correct]
   for (k in similar) {
-    if (k > 4)
+    if (k >= 4)
       break;
     alts.push({artist: similar[k].artist.name, name: similar[k].name, correct: 0});
   }
@@ -308,6 +308,8 @@ function start(imageUrl, previewUrl, artist, name, similar) {
   console.log(alts);
 
   alts = shuffle(alts);
+
+  console.log(alts);
 
   function appendScore(val, answer, correct) {
     $('#scores tr:last').after('<tr><td>' + val + '</td><td>' + answer + '</td><td>' + correct + '</td></tr>');
