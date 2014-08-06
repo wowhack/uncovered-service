@@ -76,25 +76,23 @@ $(coverCanvas).mousemove(function(e) {
 
   var pixels = coverContext.getImageData(0, 0, width, height).data;
 
-  var pltsums = [];
-  var fqsums = [];
+  var pxlen = pixels.length;
+  var pltlen = palettized.length;
+  var fqlen = frequencies.length;
+  var pltsums = new Float32Array(pltlen);
+  var fqsums = new Float32Array(fqlen);
 
-  for (var i = 0; i < pixels.length; i += 4) {
+  for (var i = 0; i < pxlen; i += 4) {
     if (pixels[i] == 0) {
       var pixelix = i / 4;
-      for (k in palettized) {
-        var plt = palettized[k];
-        pltsums[k] = pltsums[k] ? pltsums[k] + plt[pixelix] : plt[pixelix];
+      for (var k = 0; k < pltlen; ++k) {
+        pltsums[k] += palettized[k][pixelix];
       }
-      for (m in frequencies) {
-        var fq = frequencies[m];
-        fqsums[m] = fqsums[m] ? fqsums[m] + fq[pixelix] : fq[pixelix];
+      for (var m = 0; m < fqlen; ++m) {
+        fqsums[m] += frequencies[m][pixelix];
       }
     }
   }
-
-  console.log(pltsums);
-  console.log(fqsums);
 
   aj.setParams(pltsums, fqsums);
 //  aj.setParams([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], fqsums);

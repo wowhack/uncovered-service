@@ -2,17 +2,23 @@ function AudioJumbler() {
   this.url = null;
   this.context = new AudioContext();
   this.lfoGainValues = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+//  this.lfoGainValues = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
   this.gainNodes = {};
 }
 
 AudioJumbler.prototype.setParams = function (lfoValues, fqValues) {
   var self = this;
-  self.lfoGainValues = lfoValues;
+  // Use log of values
+  for (m in lfoValues) {
+    var val = lfoValues[m] - 1.0;
+    self.lfoGainValues[m] = Math.sqrt(1.0 - val*val);
+  }
   for (k in self.gainNodes) {
     var gainNode = self.gainNodes[k];
-    var node = k - 4;
+    var node = k;
     if (node in fqValues) {
-      gainNode.gain.value = fqValues[node];
+      var fqval = fqValues[k] - 1.0;
+      gainNode.gain.value = Math.sqrt(1.0 - fqval*fqval);
     } else {
       // Full gain
       gainNode.gain.value = 1.0;
@@ -84,27 +90,6 @@ AudioJumbler.prototype.start = function (url) {
 
     var eqParams = [
       {
-        fq: 20.0
-      },
-      {
-        fq: 31.7
-      },
-      {
-        fq: 50.2
-      },
-      {
-        fq: 79.6
-      },
-      {
-        fq: 126
-      },
-      {
-        fq: 200
-      },
-      {
-        fq: 317
-      },
-      {
         fq: 502
       },
       {
@@ -133,19 +118,34 @@ AudioJumbler.prototype.start = function (url) {
       }
     ];
 
-    for (k in eqParams) {
+    var ix = 0;
+
+    var bass = self.context.createBiquadFilter();
+    bass.type = "lowpass";
+    bass.frequency.value = 317;
+    bass.Q.value = 1.0;
+    bass.gain.value = 0;
+    source.connect(bass);
+    var bassgain = self.context.createGain();
+//    bassgain.gain.value = 1.0;
+    bassgain.gain.value = 0.0;
+    self.gainNodes[ix] = bassgain;
+    bass.connect(bassgain);
+    bassgain.connect(lfoGain);
+
+    for (var k = 0; k < eqParams.length; ++k) {
       function addEqNode(params) {
         var bp = self.context.createBiquadFilter();
         bp.type = "bandpass";
         bp.frequency.value = eqParams[k].fq;
-        bp.Q.value = eqParams[k].q || 1.8;
+        bp.Q.value = eqParams[k].q || 1.0;
         bp.gain.value = 0;
 
         source.connect(bp);
 
         var gain = self.context.createGain();
         gain.gain.value = 0.0;
-        self.gainNodes[k] = gain;
+        self.gainNodes[k + ix] = gain;
 
         bp.connect(gain);
         gain.connect(lfoGain);

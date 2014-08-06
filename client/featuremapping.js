@@ -5,7 +5,7 @@ var fft = require('./fft');
 // pixel contributes to that color in a 16 color palettized
 // version of the image
 function extractPalettized(pixels, width, height) {
-  var maxColors = 16;
+  var maxColors = 17; // Yay, off by one!
   var cmap = quantize.quantize(pixels, maxColors);
   var palette = cmap.palette();
   var counts = {};
@@ -14,6 +14,7 @@ function extractPalettized(pixels, width, height) {
     counts[pixel] = counts[pixel] ? counts[pixel] + 1 : 1;
   }
   var output = [
+    new Float64Array(pixels.length / 4),
     new Float64Array(pixels.length / 4),
     new Float64Array(pixels.length / 4),
     new Float64Array(pixels.length / 4),
@@ -46,7 +47,6 @@ function extractFrequencies(pixels, width, height) {
   var yblocks = Math.floor(height / 8);
   var numblocks = xblocks * yblocks;
   var blocks = [
-    new Float64Array(yblocks * xblocks),
     new Float64Array(yblocks * xblocks),
     new Float64Array(yblocks * xblocks),
     new Float64Array(yblocks * xblocks),
@@ -99,6 +99,8 @@ function extractFrequencies(pixels, width, height) {
         }
       }
       for (k in powrad) {
+        if (!(k in blocks))
+          continue;
         var blk = blocks[k];
         var val = totpow > 0 ? (powrad[k].pow / powrad[k].cnt) / totpow : 0.0;
         blk[by * xblocks + bx] = val;
